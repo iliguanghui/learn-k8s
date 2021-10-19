@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: goproxy
+  labels:
+    app: goproxy
+spec:
+  imagePullSecrets:
+  - name: aliyun-cr
+  containers:
+  - name: goproxy
+    image: registry-vpc.cn-hangzhou.aliyuncs.com/k8s-expe/goproxy:0.1
+    ports:
+    - containerPort: 8080
+      name: liveness-port
+    readinessProbe:
+      tcpSocket:
+        port: liveness-port
+      initialDelaySeconds: 5
+      periodSeconds: 10
+    livenessProbe:
+      tcpSocket:
+        port: 8080
+      initialDelaySeconds: 15
+      periodSeconds: 20
