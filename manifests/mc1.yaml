@@ -16,7 +16,7 @@ spec:
       mountPath: /html
     command: ["/bin/sh", "-c"]
     args:
-      - while true; do date >> /html/index.html; sleep 1; done
+      - while true; do date > /html/index.html; sleep 1; done
   volumes:
   - name: html
     emptyDir: {}

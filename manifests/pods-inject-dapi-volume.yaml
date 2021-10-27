@@ -1,0 +1,57 @@
+# store pod field
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kubernetes-downwardapi-volume-example
+  labels:
+    lableA: labelA
+    labelB: labelB
+    labelC: labelC
+  annotations:
+    annotation1: annotation1
+    annotation2: annotation2
+spec:
+  containers:
+    - name: arrow
+      image: busybox
+      command: ["sh", "-c"]
+      args:
+      - sleep 3600
+      volumeMounts:
+        - name: podinfo
+          mountPath: /etc/podinfo
+      resources:
+        requests:
+          cpu: 100m
+          memory: 256Mi
+        limits:
+          cpu: 200m
+          memory: 512Mi
+  volumes:
+  - name: podinfo
+    downwardAPI:
+      items:
+      - path: labels
+        fieldRef:
+          fieldPath: metadata.labels
+      - path: annotations
+        fieldRef:
+          fieldPath: metadata.annotations
+      - path: name
+        fieldRef:
+          fieldPath: metadata.name
+      - path: namespace
+        fieldRef:
+          fieldPath: metadata.namespace
+      - path: labelB
+        fieldRef:
+          fieldPath: metadata.labels['labelB']
+      - path: annotation2
+        fieldRef:
+          fieldPath: metadata.annotations['annotation2']
+      - path: not-exist-label
+        fieldRef:
+          fieldPath: metadata.labels['hello']
+      - path: not-exist-annotation
+        fieldRef:
+          fieldPath: metadata.annotations['world']
