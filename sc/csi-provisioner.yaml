@@ -1,0 +1,722 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    deployment.kubernetes.io/revision: "1"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"name":"csi-provisioner","namespace":"kube-system"},"spec":{"replicas":2,"selector":{"matchLabels":{"app":"csi-provisioner"}},"strategy":{"rollingUpdate":{"maxSurge":0,"maxUnavailable":1},"type":"RollingUpdate"},"template":{"metadata":{"labels":{"app":"csi-provisioner"}},"spec":{"affinity":{"nodeAffinity":{"preferredDuringSchedulingIgnoredDuringExecution":[{"preference":{"matchExpressions":[{"key":"node-role.kubernetes.io/master","operator":"Exists"}]},"weight":1}],"requiredDuringSchedulingIgnoredDuringExecution":{"nodeSelectorTerms":[{"matchExpressions":[{"key":"type","operator":"NotIn","values":["virtual-kubelet"]}]}]}},"podAntiAffinity":{"requiredDuringSchedulingIgnoredDuringExecution":[{"labelSelector":{"matchExpressions":[{"key":"app","operator":"In","values":["csi-provisioner"]}]},"topologyKey":"kubernetes.io/hostname"}]}},"containers":[{"args":["--provisioner=diskplugin.csi.alibabacloud.com","--csi-address=$(ADDRESS)","--feature-gates=Topology=True","--volume-name-prefix=disk","--strict-topology=true","--timeout=150s","--enable-leader-election=true","--leader-election-type=leases","--retry-interval-start=500ms","--v=5"],"env":[{"name":"ADDRESS","value":"/var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com/csi.sock"}],"image":"registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-provisioner:v1.6.0-cbd508573-aliyun","imagePullPolicy":"Always","name":"external-disk-provisioner","resources":{"requests":{"cpu":"10m","memory":"16Mi"}},"volumeMounts":[{"mountPath":"/var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com","name":"disk-provisioner-dir"}]},{"args":["--v=5","--csi-address=$(ADDRESS)","--leader-election=true"],"env":[{"name":"ADDRESS","value":"/var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com/csi.sock"}],"image":"registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-attacher:v2.1.0","imagePullPolicy":"Always","name":"external-disk-attacher","resources":{"requests":{"cpu":"10m","memory":"16Mi"}},"volumeMounts":[{"mountPath":"/var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com","name":"disk-provisioner-dir"}]},{"args":["--v=5","--csi-address=$(ADDRESS)","--leader-election"],"env":[{"name":"ADDRESS","value":"/var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com/csi.sock"}],"image":"registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-resizer:v1.1.0","imagePullPolicy":"Always","name":"external-disk-resizer","resources":{"requests":{"cpu":"10m","memory":"16Mi"}},"volumeMounts":[{"mountPath":"/var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com","name":"disk-provisioner-dir"}]},{"args":["--provisioner=nasplugin.csi.alibabacloud.com","--csi-address=$(ADDRESS)","--volume-name-prefix=nas","--timeout=150s","--enable-leader-election=true","--leader-election-type=leases","--retry-interval-start=500ms","--v=5"],"env":[{"name":"ADDRESS","value":"/var/lib/kubelet/csi-provisioner/nasplugin.csi.alibabacloud.com/csi.sock"}],"image":"registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-provisioner:v1.6.0-cbd508573-aliyun","imagePullPolicy":"Always","name":"external-nas-provisioner","resources":{"requests":{"cpu":"10m","memory":"16Mi"}},"volumeMounts":[{"mountPath":"/var/lib/kubelet/csi-provisioner/nasplugin.csi.alibabacloud.com","name":"nas-provisioner-dir"}]},{"args":["--v=5","--csi-address=$(ADDRESS)","--leader-election"],"env":[{"name":"ADDRESS","value":"/var/lib/kubelet/csi-provisioner/nasplugin.csi.alibabacloud.com/csi.sock"}],"image":"registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-resizer:v1.1.0","imagePullPolicy":"Always","name":"external-nas-resizer","resources":{"requests":{"cpu":"10m","memory":"16Mi"}},"volumeMounts":[{"mountPath":"/var/lib/kubelet/csi-provisioner/nasplugin.csi.alibabacloud.com","name":"nas-provisioner-dir"}]},{"args":["--v=5","--csi-address=$(ADDRESS)","--leader-election=true","--extra-create-metadata=true"],"env":[{"name":"ADDRESS","value":"/csi/csi.sock"}],"image":"registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-snapshotter:v4.0.0-1f9e7a7f8-aliyun","imagePullPolicy":"Always","name":"external-csi-snapshotter","resources":{"requests":{"cpu":"10m","memory":"16Mi"}},"volumeMounts":[{"mountPath":"/csi","name":"disk-provisioner-dir"}]},{"args":["--v=5","--leader-election=true"],"image":"registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/snapshot-controller:v4.0.0-41f9e7a7f8-aliyun","imagePullPolicy":"Always","name":"external-snapshot-controller","resources":{"requests":{"cpu":"10m","memory":"16Mi"}}},{"args":["--endpoint=$(CSI_ENDPOINT)","--v=2","--driver=nas,disk"],"env":[{"name":"CSI_ENDPOINT","value":"unix://var/lib/kubelet/csi-provisioner/driverplugin.csi.alibabacloud.com-replace/csi.sock"},{"name":"MAX_VOLUMES_PERNODE","value":"15"},{"name":"SERVICE_TYPE","value":"provisioner"},{"name":"CLUSTER_ID","value":"cabef31b6cffa426287e7c15c7f50deb8"}],"image":"registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-plugin:v1.18.8.51-c504ef45-aliyun","imagePullPolicy":"Always","livenessProbe":{"failureThreshold":5,"httpGet":{"path":"/healthz","port":"healthz","scheme":"HTTP"},"initialDelaySeconds":10,"periodSeconds":30,"timeoutSeconds":5},"name":"csi-provisioner","ports":[{"containerPort":11270,"name":"healthz"}],"readinessProbe":{"httpGet":{"path":"/healthz","port":"healthz"},"initialDelaySeconds":5,"periodSeconds":20},"resources":{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"securityContext":{"allowPrivilegeEscalation":true,"capabilities":{"add":["SYS_ADMIN"]},"privileged":true},"volumeMounts":[{"mountPath":"/dev","mountPropagation":"HostToContainer","name":"host-dev"},{"mountPath":"/var/log/","name":"host-log"},{"mountPath":"/host/etc","name":"etc"},{"mountPath":"/var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com","name":"disk-provisioner-dir"},{"mountPath":"/var/lib/kubelet/csi-provisioner/nasplugin.csi.alibabacloud.com","name":"nas-provisioner-dir"},{"mountPath":"/var/addon","name":"addon-token","readOnly":true}]}],"hostNetwork":true,"priorityClassName":"system-node-critical","serviceAccount":"csi-admin","tolerations":[{"effect":"NoSchedule","key":"node-role.kubernetes.io/master","operator":"Exists"},{"effect":"NoSchedule","key":"node.cloudprovider.kubernetes.io/uninitialized","operator":"Exists"}],"volumes":[{"emptyDir":{},"name":"disk-provisioner-dir"},{"emptyDir":{},"name":"nas-provisioner-dir"},{"hostPath":{"path":"/var/log/"},"name":"host-log"},{"hostPath":{"path":"/dev"},"name":"host-dev"},{"name":"addon-token","secret":{"defaultMode":420,"items":[{"key":"addon.token.config","path":"token-config"}],"optional":true,"secretName":"addon.csi.token"}},{"hostPath":{"path":"/etc"},"name":"etc"}]}}}}
+  creationTimestamp: 2021-09-15T07:35:01Z
+  generation: 1
+  managedFields:
+  - apiVersion: apps/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:kubectl.kubernetes.io/last-applied-configuration: {}
+      f:spec:
+        f:progressDeadlineSeconds: {}
+        f:replicas: {}
+        f:revisionHistoryLimit: {}
+        f:selector: {}
+        f:strategy:
+          f:rollingUpdate:
+            .: {}
+            f:maxSurge: {}
+            f:maxUnavailable: {}
+          f:type: {}
+        f:template:
+          f:metadata:
+            f:labels:
+              .: {}
+              f:app: {}
+          f:spec:
+            f:affinity:
+              .: {}
+              f:nodeAffinity:
+                .: {}
+                f:preferredDuringSchedulingIgnoredDuringExecution: {}
+                f:requiredDuringSchedulingIgnoredDuringExecution:
+                  .: {}
+                  f:nodeSelectorTerms: {}
+              f:podAntiAffinity:
+                .: {}
+                f:requiredDuringSchedulingIgnoredDuringExecution: {}
+            f:containers:
+              k:{"name":"csi-provisioner"}:
+                .: {}
+                f:args: {}
+                f:env:
+                  .: {}
+                  k:{"name":"CLUSTER_ID"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                  k:{"name":"CSI_ENDPOINT"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                  k:{"name":"MAX_VOLUMES_PERNODE"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                  k:{"name":"SERVICE_TYPE"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                f:image: {}
+                f:imagePullPolicy: {}
+                f:livenessProbe:
+                  .: {}
+                  f:failureThreshold: {}
+                  f:httpGet:
+                    .: {}
+                    f:path: {}
+                    f:port: {}
+                    f:scheme: {}
+                  f:initialDelaySeconds: {}
+                  f:periodSeconds: {}
+                  f:successThreshold: {}
+                  f:timeoutSeconds: {}
+                f:name: {}
+                f:ports:
+                  .: {}
+                  k:{"containerPort":11270,"protocol":"TCP"}:
+                    .: {}
+                    f:containerPort: {}
+                    f:hostPort: {}
+                    f:name: {}
+                    f:protocol: {}
+                f:readinessProbe:
+                  .: {}
+                  f:failureThreshold: {}
+                  f:httpGet:
+                    .: {}
+                    f:path: {}
+                    f:port: {}
+                    f:scheme: {}
+                  f:initialDelaySeconds: {}
+                  f:periodSeconds: {}
+                  f:successThreshold: {}
+                  f:timeoutSeconds: {}
+                f:resources:
+                  .: {}
+                  f:limits:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                  f:requests:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                f:securityContext:
+                  .: {}
+                  f:allowPrivilegeEscalation: {}
+                  f:capabilities:
+                    .: {}
+                    f:add: {}
+                  f:privileged: {}
+                f:terminationMessagePath: {}
+                f:terminationMessagePolicy: {}
+                f:volumeMounts:
+                  .: {}
+                  k:{"mountPath":"/dev"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:mountPropagation: {}
+                    f:name: {}
+                  k:{"mountPath":"/host/etc"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+                  k:{"mountPath":"/var/addon"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+                    f:readOnly: {}
+                  k:{"mountPath":"/var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+                  k:{"mountPath":"/var/lib/kubelet/csi-provisioner/nasplugin.csi.alibabacloud.com"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+                  k:{"mountPath":"/var/log/"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+              k:{"name":"external-csi-snapshotter"}:
+                .: {}
+                f:args: {}
+                f:env:
+                  .: {}
+                  k:{"name":"ADDRESS"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                f:image: {}
+                f:imagePullPolicy: {}
+                f:name: {}
+                f:resources:
+                  .: {}
+                  f:requests:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                f:terminationMessagePath: {}
+                f:terminationMessagePolicy: {}
+                f:volumeMounts:
+                  .: {}
+                  k:{"mountPath":"/csi"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+              k:{"name":"external-disk-attacher"}:
+                .: {}
+                f:args: {}
+                f:env:
+                  .: {}
+                  k:{"name":"ADDRESS"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                f:image: {}
+                f:imagePullPolicy: {}
+                f:name: {}
+                f:resources:
+                  .: {}
+                  f:requests:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                f:terminationMessagePath: {}
+                f:terminationMessagePolicy: {}
+                f:volumeMounts:
+                  .: {}
+                  k:{"mountPath":"/var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+              k:{"name":"external-disk-provisioner"}:
+                .: {}
+                f:args: {}
+                f:env:
+                  .: {}
+                  k:{"name":"ADDRESS"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                f:image: {}
+                f:imagePullPolicy: {}
+                f:name: {}
+                f:resources:
+                  .: {}
+                  f:requests:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                f:terminationMessagePath: {}
+                f:terminationMessagePolicy: {}
+                f:volumeMounts:
+                  .: {}
+                  k:{"mountPath":"/var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+              k:{"name":"external-disk-resizer"}:
+                .: {}
+                f:args: {}
+                f:env:
+                  .: {}
+                  k:{"name":"ADDRESS"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                f:image: {}
+                f:imagePullPolicy: {}
+                f:name: {}
+                f:resources:
+                  .: {}
+                  f:requests:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                f:terminationMessagePath: {}
+                f:terminationMessagePolicy: {}
+                f:volumeMounts:
+                  .: {}
+                  k:{"mountPath":"/var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+              k:{"name":"external-nas-provisioner"}:
+                .: {}
+                f:args: {}
+                f:env:
+                  .: {}
+                  k:{"name":"ADDRESS"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                f:image: {}
+                f:imagePullPolicy: {}
+                f:name: {}
+                f:resources:
+                  .: {}
+                  f:requests:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                f:terminationMessagePath: {}
+                f:terminationMessagePolicy: {}
+                f:volumeMounts:
+                  .: {}
+                  k:{"mountPath":"/var/lib/kubelet/csi-provisioner/nasplugin.csi.alibabacloud.com"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+              k:{"name":"external-nas-resizer"}:
+                .: {}
+                f:args: {}
+                f:env:
+                  .: {}
+                  k:{"name":"ADDRESS"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                f:image: {}
+                f:imagePullPolicy: {}
+                f:name: {}
+                f:resources:
+                  .: {}
+                  f:requests:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                f:terminationMessagePath: {}
+                f:terminationMessagePolicy: {}
+                f:volumeMounts:
+                  .: {}
+                  k:{"mountPath":"/var/lib/kubelet/csi-provisioner/nasplugin.csi.alibabacloud.com"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+              k:{"name":"external-snapshot-controller"}:
+                .: {}
+                f:args: {}
+                f:image: {}
+                f:imagePullPolicy: {}
+                f:name: {}
+                f:resources:
+                  .: {}
+                  f:requests:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                f:terminationMessagePath: {}
+                f:terminationMessagePolicy: {}
+            f:dnsPolicy: {}
+            f:hostNetwork: {}
+            f:priorityClassName: {}
+            f:restartPolicy: {}
+            f:schedulerName: {}
+            f:securityContext: {}
+            f:serviceAccount: {}
+            f:serviceAccountName: {}
+            f:terminationGracePeriodSeconds: {}
+            f:tolerations: {}
+            f:volumes:
+              .: {}
+              k:{"name":"addon-token"}:
+                .: {}
+                f:name: {}
+                f:secret:
+                  .: {}
+                  f:defaultMode: {}
+                  f:items: {}
+                  f:optional: {}
+                  f:secretName: {}
+              k:{"name":"disk-provisioner-dir"}:
+                .: {}
+                f:emptyDir: {}
+                f:name: {}
+              k:{"name":"etc"}:
+                .: {}
+                f:hostPath:
+                  .: {}
+                  f:path: {}
+                  f:type: {}
+                f:name: {}
+              k:{"name":"host-dev"}:
+                .: {}
+                f:hostPath:
+                  .: {}
+                  f:path: {}
+                  f:type: {}
+                f:name: {}
+              k:{"name":"host-log"}:
+                .: {}
+                f:hostPath:
+                  .: {}
+                  f:path: {}
+                  f:type: {}
+                f:name: {}
+              k:{"name":"nas-provisioner-dir"}:
+                .: {}
+                f:emptyDir: {}
+                f:name: {}
+    manager: rc
+    operation: Update
+    time: 2021-09-15T07:35:01Z
+  - apiVersion: apps/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          f:deployment.kubernetes.io/revision: {}
+      f:status:
+        f:availableReplicas: {}
+        f:conditions:
+          .: {}
+          k:{"type":"Available"}:
+            .: {}
+            f:lastTransitionTime: {}
+            f:lastUpdateTime: {}
+            f:message: {}
+            f:reason: {}
+            f:status: {}
+            f:type: {}
+          k:{"type":"Progressing"}:
+            .: {}
+            f:lastTransitionTime: {}
+            f:lastUpdateTime: {}
+            f:message: {}
+            f:reason: {}
+            f:status: {}
+            f:type: {}
+        f:observedGeneration: {}
+        f:readyReplicas: {}
+        f:replicas: {}
+        f:updatedReplicas: {}
+    manager: kube-controller-manager
+    operation: Update
+    time: 2021-11-03T18:23:26Z
+  name: csi-provisioner
+  namespace: kube-system
+  resourceVersion: "1866658869"
+  uid: 8dcc9655-ecaa-4e5b-83b0-68e4f2ad72a0
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 2
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: csi-provisioner
+  strategy:
+    rollingUpdate:
+      maxSurge: 0
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: csi-provisioner
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - preference:
+              matchExpressions:
+              - key: node-role.kubernetes.io/master
+                operator: Exists
+            weight: 1
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: type
+                operator: NotIn
+                values:
+                - virtual-kubelet
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - csi-provisioner
+            topologyKey: kubernetes.io/hostname
+      containers:
+      - args:
+        - --provisioner=diskplugin.csi.alibabacloud.com
+        - --csi-address=$(ADDRESS)
+        - --feature-gates=Topology=True
+        - --volume-name-prefix=disk
+        - --strict-topology=true
+        - --timeout=150s
+        - --enable-leader-election=true
+        - --leader-election-type=leases
+        - --retry-interval-start=500ms
+        - --v=5
+        env:
+        - name: ADDRESS
+          value: /var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com/csi.sock
+        image: registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-provisioner:v1.6.0-cbd508573-aliyun
+        imagePullPolicy: Always
+        name: external-disk-provisioner
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com
+          name: disk-provisioner-dir
+      - args:
+        - --v=5
+        - --csi-address=$(ADDRESS)
+        - --leader-election=true
+        env:
+        - name: ADDRESS
+          value: /var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com/csi.sock
+        image: registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-attacher:v2.1.0
+        imagePullPolicy: Always
+        name: external-disk-attacher
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com
+          name: disk-provisioner-dir
+      - args:
+        - --v=5
+        - --csi-address=$(ADDRESS)
+        - --leader-election
+        env:
+        - name: ADDRESS
+          value: /var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com/csi.sock
+        image: registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-resizer:v1.1.0
+        imagePullPolicy: Always
+        name: external-disk-resizer
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com
+          name: disk-provisioner-dir
+      - args:
+        - --provisioner=nasplugin.csi.alibabacloud.com
+        - --csi-address=$(ADDRESS)
+        - --volume-name-prefix=nas
+        - --timeout=150s
+        - --enable-leader-election=true
+        - --leader-election-type=leases
+        - --retry-interval-start=500ms
+        - --v=5
+        env:
+        - name: ADDRESS
+          value: /var/lib/kubelet/csi-provisioner/nasplugin.csi.alibabacloud.com/csi.sock
+        image: registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-provisioner:v1.6.0-cbd508573-aliyun
+        imagePullPolicy: Always
+        name: external-nas-provisioner
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/kubelet/csi-provisioner/nasplugin.csi.alibabacloud.com
+          name: nas-provisioner-dir
+      - args:
+        - --v=5
+        - --csi-address=$(ADDRESS)
+        - --leader-election
+        env:
+        - name: ADDRESS
+          value: /var/lib/kubelet/csi-provisioner/nasplugin.csi.alibabacloud.com/csi.sock
+        image: registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-resizer:v1.1.0
+        imagePullPolicy: Always
+        name: external-nas-resizer
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/kubelet/csi-provisioner/nasplugin.csi.alibabacloud.com
+          name: nas-provisioner-dir
+      - args:
+        - --v=5
+        - --csi-address=$(ADDRESS)
+        - --leader-election=true
+        - --extra-create-metadata=true
+        env:
+        - name: ADDRESS
+          value: /csi/csi.sock
+        image: registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-snapshotter:v4.0.0-1f9e7a7f8-aliyun
+        imagePullPolicy: Always
+        name: external-csi-snapshotter
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /csi
+          name: disk-provisioner-dir
+      - args:
+        - --v=5
+        - --leader-election=true
+        image: registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/snapshot-controller:v4.0.0-41f9e7a7f8-aliyun
+        imagePullPolicy: Always
+        name: external-snapshot-controller
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      - args:
+        - --endpoint=$(CSI_ENDPOINT)
+        - --v=2
+        - --driver=nas,disk
+        env:
+        - name: CSI_ENDPOINT
+          value: unix://var/lib/kubelet/csi-provisioner/driverplugin.csi.alibabacloud.com-replace/csi.sock
+        - name: MAX_VOLUMES_PERNODE
+          value: "15"
+        - name: SERVICE_TYPE
+          value: provisioner
+        - name: CLUSTER_ID
+          value: cabef31b6cffa426287e7c15c7f50deb8
+        image: registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-plugin:v1.18.8.51-c504ef45-aliyun
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /healthz
+            port: healthz
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: csi-provisioner
+        ports:
+        - containerPort: 11270
+          hostPort: 11270
+          name: healthz
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 3
+          httpGet:
+            path: /healthz
+            port: healthz
+            scheme: HTTP
+          initialDelaySeconds: 5
+          periodSeconds: 20
+          successThreshold: 1
+          timeoutSeconds: 1
+        resources:
+          limits:
+            cpu: 500m
+            memory: 512Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            add:
+            - SYS_ADMIN
+          privileged: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /dev
+          mountPropagation: HostToContainer
+          name: host-dev
+        - mountPath: /var/log/
+          name: host-log
+        - mountPath: /host/etc
+          name: etc
+        - mountPath: /var/lib/kubelet/csi-provisioner/diskplugin.csi.alibabacloud.com
+          name: disk-provisioner-dir
+        - mountPath: /var/lib/kubelet/csi-provisioner/nasplugin.csi.alibabacloud.com
+          name: nas-provisioner-dir
+        - mountPath: /var/addon
+          name: addon-token
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      priorityClassName: system-node-critical
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: csi-admin
+      serviceAccountName: csi-admin
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
+        operator: Exists
+      - effect: NoSchedule
+        key: node.cloudprovider.kubernetes.io/uninitialized
+        operator: Exists
+      volumes:
+      - emptyDir: {}
+        name: disk-provisioner-dir
+      - emptyDir: {}
+        name: nas-provisioner-dir
+      - hostPath:
+          path: /var/log/
+          type: ""
+        name: host-log
+      - hostPath:
+          path: /dev
+          type: ""
+        name: host-dev
+      - name: addon-token
+        secret:
+          defaultMode: 420
+          items:
+          - key: addon.token.config
+            path: token-config
+          optional: true
+          secretName: addon.csi.token
+      - hostPath:
+          path: /etc
+          type: ""
+        name: etc
+status:
+  availableReplicas: 2
+  conditions:
+  - lastTransitionTime: 2021-09-15T07:43:44Z
+    lastUpdateTime: 2021-09-15T07:43:44Z
+    message: Deployment has minimum availability.
+    reason: MinimumReplicasAvailable
+    status: "True"
+    type: Available
+  - lastTransitionTime: 2021-09-15T07:35:01Z
+    lastUpdateTime: 2021-09-15T07:44:29Z
+    message: ReplicaSet "csi-provisioner-855b976cf7" has successfully progressed.
+    reason: NewReplicaSetAvailable
+    status: "True"
+    type: Progressing
+  observedGeneration: 1
+  readyReplicas: 2
+  replicas: 2
+  updatedReplicas: 2

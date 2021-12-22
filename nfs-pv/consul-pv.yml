@@ -1,0 +1,53 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: data-consul-consul-server-0
+spec:
+  capacity:
+    storage: 2Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /nfs/data/data-consul-consul-server-0
+    server: 192.168.10.51
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: data-consul-consul-server-1
+spec:
+  capacity:
+    storage: 2Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /nfs/data/data-consul-consul-server-1
+    server: 192.168.10.51
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: data-consul-consul-server-2
+spec:
+  capacity:
+    storage: 2Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /nfs/data/data-consul-consul-server-2
+    server: 192.168.10.51

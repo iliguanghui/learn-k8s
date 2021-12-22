@@ -1,0 +1,536 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  annotations:
+    deprecated.daemonset.template.generation: "1"
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"apps/v1","kind":"DaemonSet","metadata":{"annotations":{},"name":"csi-plugin","namespace":"kube-system"},"spec":{"selector":{"matchLabels":{"app":"csi-plugin"}},"template":{"metadata":{"labels":{"app":"csi-plugin"}},"spec":{"affinity":{"nodeAffinity":{"requiredDuringSchedulingIgnoredDuringExecution":{"nodeSelectorTerms":[{"matchExpressions":[{"key":"type","operator":"NotIn","values":["virtual-kubelet"]}]}]}}},"containers":[{"args":["--v=5","--csi-address=/var/lib/kubelet/csi-plugins/diskplugin.csi.alibabacloud.com/csi.sock","--kubelet-registration-path=/var/lib/kubelet/csi-plugins/diskplugin.csi.alibabacloud.com/csi.sock"],"image":"registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-node-driver-registrar:v1.2.0","imagePullPolicy":"Always","name":"disk-driver-registrar","resources":{"requests":{"cpu":"10m","memory":"16Mi"}},"volumeMounts":[{"mountPath":"/var/lib/kubelet","name":"kubelet-dir"},{"mountPath":"/registration","name":"registration-dir"}]},{"args":["--v=5","--csi-address=/var/lib/kubelet/csi-plugins/nasplugin.csi.alibabacloud.com/csi.sock","--kubelet-registration-path=/var/lib/kubelet/csi-plugins/nasplugin.csi.alibabacloud.com/csi.sock"],"image":"registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-node-driver-registrar:v1.2.0","imagePullPolicy":"Always","name":"nas-driver-registrar","resources":{"requests":{"cpu":"10m","memory":"16Mi"}},"volumeMounts":[{"mountPath":"/var/lib/kubelet/","name":"kubelet-dir"},{"mountPath":"/registration","name":"registration-dir"}]},{"args":["--v=5","--csi-address=/var/lib/kubelet/csi-plugins/ossplugin.csi.alibabacloud.com/csi.sock","--kubelet-registration-path=/var/lib/kubelet/csi-plugins/ossplugin.csi.alibabacloud.com/csi.sock"],"image":"registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-node-driver-registrar:v1.2.0","imagePullPolicy":"Always","name":"oss-driver-registrar","resources":{"requests":{"cpu":"10m","memory":"16Mi"}},"volumeMounts":[{"mountPath":"/var/lib/kubelet/","name":"kubelet-dir"},{"mountPath":"/registration","name":"registration-dir"}]},{"args":["--endpoint=$(CSI_ENDPOINT)","--v=2","--driver=oss,nas,disk"],"env":[{"name":"KUBE_NODE_NAME","valueFrom":{"fieldRef":{"apiVersion":"v1","fieldPath":"spec.nodeName"}}},{"name":"CSI_ENDPOINT","value":"unix://var/lib/kubelet/csi-plugins/driverplugin.csi.alibabacloud.com-replace/csi.sock"},{"name":"MAX_VOLUMES_PERNODE","value":"15"},{"name":"SERVICE_TYPE","value":"plugin"}],"image":"registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-plugin:v1.18.8.51-c504ef45-aliyun","imagePullPolicy":"Always","livenessProbe":{"failureThreshold":5,"httpGet":{"path":"/healthz","port":"healthz","scheme":"HTTP"},"initialDelaySeconds":10,"periodSeconds":30,"timeoutSeconds":5},"name":"csi-plugin","ports":[{"containerPort":11260,"name":"healthz"}],"readinessProbe":{"failureThreshold":5,"httpGet":{"path":"/healthz","port":"healthz"},"initialDelaySeconds":10,"periodSeconds":30,"timeoutSeconds":5},"resources":{"limits":{"cpu":"500m","memory":"1024Mi"},"requests":{"cpu":"100m","memory":"128Mi"}},"securityContext":{"allowPrivilegeEscalation":true,"capabilities":{"add":["SYS_ADMIN"]},"privileged":true},"volumeMounts":[{"mountPath":"/var/lib/kubelet/","mountPropagation":"Bidirectional","name":"kubelet-dir"},{"mountPath":"/host/etc","name":"etc"},{"mountPath":"/var/log/","name":"host-log"},{"mountPath":"/host/usr/","name":"ossconnectordir"},{"mountPath":"/var/lib/container","mountPropagation":"Bidirectional","name":"container-dir"},{"mountPath":"/dev","mountPropagation":"HostToContainer","name":"host-dev"},{"mountPath":"/var/addon","name":"addon-token","readOnly":true}]}],"hostNetwork":true,"hostPID":true,"nodeSelector":{"beta.kubernetes.io/os":"linux"},"priorityClassName":"system-node-critical","serviceAccount":"csi-admin","tolerations":[{"operator":"Exists"}],"volumes":[{"hostPath":{"path":"/var/lib/kubelet/plugins_registry","type":"DirectoryOrCreate"},"name":"registration-dir"},{"hostPath":{"path":"/var/lib/container","type":"DirectoryOrCreate"},"name":"container-dir"},{"hostPath":{"path":"/var/lib/kubelet","type":"Directory"},"name":"kubelet-dir"},{"hostPath":{"path":"/dev"},"name":"host-dev"},{"hostPath":{"path":"/var/log/"},"name":"host-log"},{"hostPath":{"path":"/etc"},"name":"etc"},{"hostPath":{"path":"/usr/"},"name":"ossconnectordir"},{"name":"addon-token","secret":{"defaultMode":420,"items":[{"key":"addon.token.config","path":"token-config"}],"optional":true,"secretName":"addon.csi.token"}}]}},"updateStrategy":{"rollingUpdate":{"maxUnavailable":"10%"},"type":"RollingUpdate"}}}
+  creationTimestamp: 2021-09-15T07:35:00Z
+  generation: 1
+  managedFields:
+  - apiVersion: apps/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:metadata:
+        f:annotations:
+          .: {}
+          f:deprecated.daemonset.template.generation: {}
+          f:kubectl.kubernetes.io/last-applied-configuration: {}
+      f:spec:
+        f:revisionHistoryLimit: {}
+        f:selector: {}
+        f:template:
+          f:metadata:
+            f:labels:
+              .: {}
+              f:app: {}
+          f:spec:
+            f:affinity:
+              .: {}
+              f:nodeAffinity:
+                .: {}
+                f:requiredDuringSchedulingIgnoredDuringExecution:
+                  .: {}
+                  f:nodeSelectorTerms: {}
+            f:containers:
+              k:{"name":"csi-plugin"}:
+                .: {}
+                f:args: {}
+                f:env:
+                  .: {}
+                  k:{"name":"CSI_ENDPOINT"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                  k:{"name":"KUBE_NODE_NAME"}:
+                    .: {}
+                    f:name: {}
+                    f:valueFrom:
+                      .: {}
+                      f:fieldRef:
+                        .: {}
+                        f:apiVersion: {}
+                        f:fieldPath: {}
+                  k:{"name":"MAX_VOLUMES_PERNODE"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                  k:{"name":"SERVICE_TYPE"}:
+                    .: {}
+                    f:name: {}
+                    f:value: {}
+                f:image: {}
+                f:imagePullPolicy: {}
+                f:livenessProbe:
+                  .: {}
+                  f:failureThreshold: {}
+                  f:httpGet:
+                    .: {}
+                    f:path: {}
+                    f:port: {}
+                    f:scheme: {}
+                  f:initialDelaySeconds: {}
+                  f:periodSeconds: {}
+                  f:successThreshold: {}
+                  f:timeoutSeconds: {}
+                f:name: {}
+                f:ports:
+                  .: {}
+                  k:{"containerPort":11260,"protocol":"TCP"}:
+                    .: {}
+                    f:containerPort: {}
+                    f:hostPort: {}
+                    f:name: {}
+                    f:protocol: {}
+                f:readinessProbe:
+                  .: {}
+                  f:failureThreshold: {}
+                  f:httpGet:
+                    .: {}
+                    f:path: {}
+                    f:port: {}
+                    f:scheme: {}
+                  f:initialDelaySeconds: {}
+                  f:periodSeconds: {}
+                  f:successThreshold: {}
+                  f:timeoutSeconds: {}
+                f:resources:
+                  .: {}
+                  f:limits:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                  f:requests:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                f:securityContext:
+                  .: {}
+                  f:allowPrivilegeEscalation: {}
+                  f:capabilities:
+                    .: {}
+                    f:add: {}
+                  f:privileged: {}
+                f:terminationMessagePath: {}
+                f:terminationMessagePolicy: {}
+                f:volumeMounts:
+                  .: {}
+                  k:{"mountPath":"/dev"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:mountPropagation: {}
+                    f:name: {}
+                  k:{"mountPath":"/host/etc"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+                  k:{"mountPath":"/host/usr/"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+                  k:{"mountPath":"/var/addon"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+                    f:readOnly: {}
+                  k:{"mountPath":"/var/lib/container"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:mountPropagation: {}
+                    f:name: {}
+                  k:{"mountPath":"/var/lib/kubelet/"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:mountPropagation: {}
+                    f:name: {}
+                  k:{"mountPath":"/var/log/"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+              k:{"name":"disk-driver-registrar"}:
+                .: {}
+                f:args: {}
+                f:image: {}
+                f:imagePullPolicy: {}
+                f:name: {}
+                f:resources:
+                  .: {}
+                  f:requests:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                f:terminationMessagePath: {}
+                f:terminationMessagePolicy: {}
+                f:volumeMounts:
+                  .: {}
+                  k:{"mountPath":"/registration"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+                  k:{"mountPath":"/var/lib/kubelet"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+              k:{"name":"nas-driver-registrar"}:
+                .: {}
+                f:args: {}
+                f:image: {}
+                f:imagePullPolicy: {}
+                f:name: {}
+                f:resources:
+                  .: {}
+                  f:requests:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                f:terminationMessagePath: {}
+                f:terminationMessagePolicy: {}
+                f:volumeMounts:
+                  .: {}
+                  k:{"mountPath":"/registration"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+                  k:{"mountPath":"/var/lib/kubelet/"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+              k:{"name":"oss-driver-registrar"}:
+                .: {}
+                f:args: {}
+                f:image: {}
+                f:imagePullPolicy: {}
+                f:name: {}
+                f:resources:
+                  .: {}
+                  f:requests:
+                    .: {}
+                    f:cpu: {}
+                    f:memory: {}
+                f:terminationMessagePath: {}
+                f:terminationMessagePolicy: {}
+                f:volumeMounts:
+                  .: {}
+                  k:{"mountPath":"/registration"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+                  k:{"mountPath":"/var/lib/kubelet/"}:
+                    .: {}
+                    f:mountPath: {}
+                    f:name: {}
+            f:dnsPolicy: {}
+            f:hostNetwork: {}
+            f:hostPID: {}
+            f:nodeSelector:
+              .: {}
+              f:beta.kubernetes.io/os: {}
+            f:priorityClassName: {}
+            f:restartPolicy: {}
+            f:schedulerName: {}
+            f:securityContext: {}
+            f:serviceAccount: {}
+            f:serviceAccountName: {}
+            f:terminationGracePeriodSeconds: {}
+            f:tolerations: {}
+            f:volumes:
+              .: {}
+              k:{"name":"addon-token"}:
+                .: {}
+                f:name: {}
+                f:secret:
+                  .: {}
+                  f:defaultMode: {}
+                  f:items: {}
+                  f:optional: {}
+                  f:secretName: {}
+              k:{"name":"container-dir"}:
+                .: {}
+                f:hostPath:
+                  .: {}
+                  f:path: {}
+                  f:type: {}
+                f:name: {}
+              k:{"name":"etc"}:
+                .: {}
+                f:hostPath:
+                  .: {}
+                  f:path: {}
+                  f:type: {}
+                f:name: {}
+              k:{"name":"host-dev"}:
+                .: {}
+                f:hostPath:
+                  .: {}
+                  f:path: {}
+                  f:type: {}
+                f:name: {}
+              k:{"name":"host-log"}:
+                .: {}
+                f:hostPath:
+                  .: {}
+                  f:path: {}
+                  f:type: {}
+                f:name: {}
+              k:{"name":"kubelet-dir"}:
+                .: {}
+                f:hostPath:
+                  .: {}
+                  f:path: {}
+                  f:type: {}
+                f:name: {}
+              k:{"name":"ossconnectordir"}:
+                .: {}
+                f:hostPath:
+                  .: {}
+                  f:path: {}
+                  f:type: {}
+                f:name: {}
+              k:{"name":"registration-dir"}:
+                .: {}
+                f:hostPath:
+                  .: {}
+                  f:path: {}
+                  f:type: {}
+                f:name: {}
+        f:updateStrategy:
+          f:rollingUpdate:
+            .: {}
+            f:maxUnavailable: {}
+          f:type: {}
+    manager: rc
+    operation: Update
+    time: 2021-09-15T07:35:00Z
+  - apiVersion: apps/v1
+    fieldsType: FieldsV1
+    fieldsV1:
+      f:status:
+        f:currentNumberScheduled: {}
+        f:desiredNumberScheduled: {}
+        f:numberAvailable: {}
+        f:numberReady: {}
+        f:observedGeneration: {}
+        f:updatedNumberScheduled: {}
+    manager: kube-controller-manager
+    operation: Update
+    time: 2021-10-18T06:09:04Z
+  name: csi-plugin
+  namespace: kube-system
+  resourceVersion: "1812671225"
+  uid: ed9f08f2-58cc-462c-ab37-c013a7ebd6e2
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: csi-plugin
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: csi-plugin
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: type
+                operator: NotIn
+                values:
+                - virtual-kubelet
+      containers:
+      - args:
+        - --v=5
+        - --csi-address=/var/lib/kubelet/csi-plugins/diskplugin.csi.alibabacloud.com/csi.sock
+        - --kubelet-registration-path=/var/lib/kubelet/csi-plugins/diskplugin.csi.alibabacloud.com/csi.sock
+        image: registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-node-driver-registrar:v1.2.0
+        imagePullPolicy: Always
+        name: disk-driver-registrar
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/kubelet
+          name: kubelet-dir
+        - mountPath: /registration
+          name: registration-dir
+      - args:
+        - --v=5
+        - --csi-address=/var/lib/kubelet/csi-plugins/nasplugin.csi.alibabacloud.com/csi.sock
+        - --kubelet-registration-path=/var/lib/kubelet/csi-plugins/nasplugin.csi.alibabacloud.com/csi.sock
+        image: registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-node-driver-registrar:v1.2.0
+        imagePullPolicy: Always
+        name: nas-driver-registrar
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/kubelet/
+          name: kubelet-dir
+        - mountPath: /registration
+          name: registration-dir
+      - args:
+        - --v=5
+        - --csi-address=/var/lib/kubelet/csi-plugins/ossplugin.csi.alibabacloud.com/csi.sock
+        - --kubelet-registration-path=/var/lib/kubelet/csi-plugins/ossplugin.csi.alibabacloud.com/csi.sock
+        image: registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-node-driver-registrar:v1.2.0
+        imagePullPolicy: Always
+        name: oss-driver-registrar
+        resources:
+          requests:
+            cpu: 10m
+            memory: 16Mi
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/kubelet/
+          name: kubelet-dir
+        - mountPath: /registration
+          name: registration-dir
+      - args:
+        - --endpoint=$(CSI_ENDPOINT)
+        - --v=2
+        - --driver=oss,nas,disk
+        env:
+        - name: KUBE_NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        - name: CSI_ENDPOINT
+          value: unix://var/lib/kubelet/csi-plugins/driverplugin.csi.alibabacloud.com-replace/csi.sock
+        - name: MAX_VOLUMES_PERNODE
+          value: "15"
+        - name: SERVICE_TYPE
+          value: plugin
+        image: registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/csi-plugin:v1.18.8.51-c504ef45-aliyun
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /healthz
+            port: healthz
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 5
+        name: csi-plugin
+        ports:
+        - containerPort: 11260
+          hostPort: 11260
+          name: healthz
+          protocol: TCP
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+            path: /healthz
+            port: healthz
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 30
+          successThreshold: 1
+          timeoutSeconds: 5
+        resources:
+          limits:
+            cpu: 500m
+            memory: 1Gi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+        securityContext:
+          allowPrivilegeEscalation: true
+          capabilities:
+            add:
+            - SYS_ADMIN
+          privileged: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /var/lib/kubelet/
+          mountPropagation: Bidirectional
+          name: kubelet-dir
+        - mountPath: /host/etc
+          name: etc
+        - mountPath: /var/log/
+          name: host-log
+        - mountPath: /host/usr/
+          name: ossconnectordir
+        - mountPath: /var/lib/container
+          mountPropagation: Bidirectional
+          name: container-dir
+        - mountPath: /dev
+          mountPropagation: HostToContainer
+          name: host-dev
+        - mountPath: /var/addon
+          name: addon-token
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      hostPID: true
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      priorityClassName: system-node-critical
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: csi-admin
+      serviceAccountName: csi-admin
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - operator: Exists
+      volumes:
+      - hostPath:
+          path: /var/lib/kubelet/plugins_registry
+          type: DirectoryOrCreate
+        name: registration-dir
+      - hostPath:
+          path: /var/lib/container
+          type: DirectoryOrCreate
+        name: container-dir
+      - hostPath:
+          path: /var/lib/kubelet
+          type: Directory
+        name: kubelet-dir
+      - hostPath:
+          path: /dev
+          type: ""
+        name: host-dev
+      - hostPath:
+          path: /var/log/
+          type: ""
+        name: host-log
+      - hostPath:
+          path: /etc
+          type: ""
+        name: etc
+      - hostPath:
+          path: /usr/
+          type: ""
+        name: ossconnectordir
+      - name: addon-token
+        secret:
+          defaultMode: 420
+          items:
+          - key: addon.token.config
+            path: token-config
+          optional: true
+          secretName: addon.csi.token
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 10%
+    type: RollingUpdate
+status:
+  currentNumberScheduled: 4
+  desiredNumberScheduled: 4
+  numberAvailable: 4
+  numberMisscheduled: 0
+  numberReady: 4
+  observedGeneration: 1
+  updatedNumberScheduled: 4

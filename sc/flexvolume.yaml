@@ -1,0 +1,113 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  labels:
+    k8s-volume: flexvolume
+  name: flexvolume
+  namespace: kube-system
+spec:
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      name: acs-flexvolume
+  template:
+    metadata:
+      labels:
+        name: acs-flexvolume
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: type
+                operator: NotIn
+                values:
+                - virtual-kubelet
+      containers:
+      - env:
+        - name: ACS_DISK
+          value: "true"
+        - name: ACS_NAS
+          value: "true"
+        - name: ACS_OSS
+          value: "true"
+        image: registry-vpc.cn-zhangjiakou.aliyuncs.com/acs/flexvolume:v1.14.8.109-649dc5a-aliyun
+        imagePullPolicy: Always
+        livenessProbe:
+          exec:
+            command:
+            - sh
+            - -c
+            - ls /acs/flexvolume
+          failureThreshold: 8
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 15
+        name: acs-flexvolume
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1000Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        securityContext:
+          privileged: true
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /host/usr/
+          name: usrdir
+        - mountPath: /host/etc/
+          name: etcdir
+        - mountPath: /var/log/alicloud/
+          name: logdir
+        - mountPath: /var/lib/kubelet
+          mountPropagation: Bidirectional
+          name: kubeletdir
+        - mountPath: /var/addon
+          name: addon-token
+          readOnly: true
+      dnsPolicy: ClusterFirst
+      hostNetwork: true
+      hostPID: true
+      nodeSelector:
+        beta.kubernetes.io/os: linux
+      priorityClassName: system-node-critical
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      tolerations:
+      - operator: Exists
+      volumes:
+      - hostPath:
+          path: /usr/
+          type: ""
+        name: usrdir
+      - hostPath:
+          path: /etc/
+          type: ""
+        name: etcdir
+      - hostPath:
+          path: /var/log/alicloud/
+          type: ""
+        name: logdir
+      - hostPath:
+          path: /var/lib/kubelet
+          type: Directory
+        name: kubeletdir
+      - name: addon-token
+        secret:
+          defaultMode: 420
+          items:
+          - key: addon.token.config
+            path: token-config
+          optional: true
+          secretName: addon.csi.token
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 10%
+    type: RollingUpdate
